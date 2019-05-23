@@ -5,6 +5,8 @@
 
 <!-- badges: start -->
 
+[![Travis build
+status](https://travis-ci.org/sstoeckl/uncertaintymeasures.svg?branch=master)](https://travis-ci.org/sstoeckl/uncertaintymeasures)
 <!-- badges: end -->
 
 The goal of uncertaintymeasures is to …
