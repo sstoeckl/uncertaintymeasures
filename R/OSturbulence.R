@@ -79,7 +79,9 @@ OSturbulence <- function(X, weights=NULL, squared=FALSE, norm=FALSE, method=NULL
   # dimension warning
   if((roll.obs-1)<=n){stop("You need more observations to start estimation with (cross-section>number of obs)")}
   # initiate na.obs.min to be equal to (if =null and not previously given)
-  na.obs.min <- min(n,roll.obs)
+  if (is.null(na.obs.min)){
+    na.obs.min <- min(n,roll.obs)
+  }
   #
   for (i in roll.obs:m){ #for i>roll.obs we get finally out.of.sample
     # (i-1) for one future observation
