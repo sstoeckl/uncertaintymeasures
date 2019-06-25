@@ -15,6 +15,7 @@
 #' @param roll.obs optional, rolling=TRUE: Length of rolling window; rolling=FALSE: Initial estimation window size
 #' @param use optional, use="pairwise.complete.obs": What method of dealing with missing values should be used (note, that variables
 #' with more than half missing obs are thrown out anyway)
+#' @params na.obs.min optional, specify the number of observations necessary to be included in the output index
 #'
 #' @return list containing 4 elements:
 #'    - turb: turbulence index
@@ -41,7 +42,7 @@
 #'
 #' @export
 OSturbulence <- function(X, weights=NULL, squared=FALSE, norm=FALSE, method=NULL, s.k=1, imp=FALSE,
-                         rolling=FALSE, roll.obs=100, use="complete.obs"){
+                         rolling=FALSE, roll.obs=100, use="complete.obs",na.obs.min=NULL){
   # method = c("cov", "mve", "mcd", "MCD", "OGK", "nnve", "shrink", "bagged")
   if (!requireNamespace("xts", quietly = TRUE)) {
     stop("Package \"xts\" needed for this function to work. Please install it.",
@@ -77,12 +78,14 @@ OSturbulence <- function(X, weights=NULL, squared=FALSE, norm=FALSE, method=NULL
   x.mturb <- x.turb
   # dimension warning
   if((roll.obs-1)<=n){stop("You need more observations to start estimation with (cross-section>number of obs)")}
+  # initiate na.obs.min to be equal to (if =null and not previously given)
+  na.obs.min <- min(n,roll.obs)
   #
   for (i in roll.obs:m){ #for i>roll.obs we get finally out.of.sample
     # (i-1) for one future observation
     if (rolling==FALSE) {x.sel <- x[1:(i-1),]} else {x.sel <- x[max(1,i-roll.obs):(i-1),]}
     # check if there are cols with more than half NA
-    cols <- which(apply(x.sel,2,function(y) sum(!is.na(y)))>=min(n,roll.obs)) # if rolling window is smaller than no of PFs
+    cols <- which(apply(x.sel,2,function(y) sum(!is.na(y)))>=na.obs.min) # if rolling window is smaller than no of PFs
     if (length(cols)>0){
       if (!is.null(method)) {
         x.moms <- assetsMeanCov(x.sel[,cols],method=method)
