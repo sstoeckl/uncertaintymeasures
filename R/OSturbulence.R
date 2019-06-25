@@ -13,6 +13,8 @@
 #' @param imp optional, should missing values be imputed? (standard:)
 #' @param rolling optional, Should moments be calculated based on a rolling window?
 #' @param roll.obs optional, rolling=TRUE: Length of rolling window; rolling=FALSE: Initial estimation window size
+#' @param use optional, use="pairwise.complete.obs": What method of dealing with missing values should be used (note, that variables
+#' with more than half missing obs are thrown out anyway)
 #'
 #' @return list containing 4 elements:
 #'    - turb: turbulence index
@@ -39,7 +41,7 @@
 #'
 #' @export
 OSturbulence <- function(X, weights=NULL, squared=FALSE, norm=FALSE, method=NULL, s.k=1, imp=FALSE,
-                         rolling=FALSE, roll.obs=100){
+                         rolling=FALSE, roll.obs=100, use="pairwise.complete.obs"){
   # method = c("cov", "mve", "mcd", "MCD", "OGK", "nnve", "shrink", "bagged")
   if (!requireNamespace("xts", quietly = TRUE)) {
     stop("Package \"xts\" needed for this function to work. Please install it.",
@@ -74,7 +76,7 @@ OSturbulence <- function(X, weights=NULL, squared=FALSE, norm=FALSE, method=NULL
   x.turb <- x.turb.grad[,1]
   x.mturb <- x.turb
   # dimension warning
-  if((roll.obs-1)<=n){stop("You need more observations tom start estimation with (cross-section>number of obs)")}
+  if((roll.obs-1)<=n){stop("You need more observations to start estimation with (cross-section>number of obs)")}
   #
   for (i in roll.obs:m){ #for i>roll.obs we get finally out.of.sample
     # (i-1) for one future observation
@@ -87,7 +89,7 @@ OSturbulence <- function(X, weights=NULL, squared=FALSE, norm=FALSE, method=NULL
         x.Cov <- getCovRob(x.moms)
         x.mean <- getCenterRob(x.moms)
       }	else {
-        x.Cov <- (stats::cov(x.sel[,cols],use="complete.obs")) ## nearPD removed, replaced by pseudo-inverse
+        x.Cov <- (stats::cov(x.sel[,cols],use=use)) ## nearPD removed, replaced by pseudo-inverse
         x.mean <- colMeans(x.sel[,cols],na.rm=TRUE)
       }
       x.iCov <- .mpinv(x.Cov)
