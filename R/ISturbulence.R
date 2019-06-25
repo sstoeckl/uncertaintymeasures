@@ -11,6 +11,8 @@
 #' @param method optional, if a robust mean/covariance estimator should be used
 #' @param s.k optional, lookback window for current observations that are related to the long-term mean
 #' @param imp optional, should missing values be imputed? (standard:)
+#' @param use optional, use="pairwise.complete.obs": What method of dealing with missing values should be used (note, that variables
+#' with more than half missing obs are thrown out anyway)
 #'
 #' @return list containing 4 elements:
 #'    - turb: turbulence index
@@ -36,7 +38,7 @@
 #' @importFrom timeSeries colStats
 #'
 #' @export
-ISturbulence <- function(X, weights=NULL, squared=FALSE, norm=FALSE, method=NULL, s.k=1, imp=FALSE){
+ISturbulence <- function(X, weights=NULL, squared=FALSE, norm=FALSE, method=NULL, s.k=1, imp=FALSE, use="complete.obs"){
   # method = c("cov", "mve", "mcd", "MCD", "OGK", "nnve", "shrink", "bagged")
   if (!requireNamespace("xts", quietly = TRUE)) {
     stop("Package \"xts\" needed for this function to work. Please install it.",
