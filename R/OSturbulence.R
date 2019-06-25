@@ -41,7 +41,7 @@
 #'
 #' @export
 OSturbulence <- function(X, weights=NULL, squared=FALSE, norm=FALSE, method=NULL, s.k=1, imp=FALSE,
-                         rolling=FALSE, roll.obs=100, use="pairwise.complete.obs"){
+                         rolling=FALSE, roll.obs=100, use="complete.obs"){
   # method = c("cov", "mve", "mcd", "MCD", "OGK", "nnve", "shrink", "bagged")
   if (!requireNamespace("xts", quietly = TRUE)) {
     stop("Package \"xts\" needed for this function to work. Please install it.",
