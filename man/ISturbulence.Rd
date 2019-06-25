@@ -5,7 +5,7 @@
 \title{Calculate In-sample turbulence}
 \usage{
 ISturbulence(X, weights = NULL, squared = FALSE, norm = FALSE,
-  method = NULL, s.k = 1, imp = FALSE)
+  method = NULL, s.k = 1, imp = FALSE, use = "complete.obs")
 }
 \arguments{
 \item{X}{the dataset X in xts format (if not, the program will try to convert it to xts)}
@@ -22,6 +22,9 @@ if weights=NULL (the default), equal weights will be generated based on the numb
 \item{s.k}{optional, lookback window for current observations that are related to the long-term mean}
 
 \item{imp}{optional, should missing values be imputed? (standard:)}
+
+\item{use}{optional, use="pairwise.complete.obs": What method of dealing with missing values should be used (note, that variables
+with more than half missing obs are thrown out anyway)}
 }
 \value{
 list containing 4 elements:

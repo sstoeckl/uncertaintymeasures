@@ -6,7 +6,7 @@
 \usage{
 OSturbulence(X, weights = NULL, squared = FALSE, norm = FALSE,
   method = NULL, s.k = 1, imp = FALSE, rolling = FALSE,
-  roll.obs = 100, use = "pairwise.complete.obs")
+  roll.obs = 100, use = "complete.obs")
 }
 \arguments{
 \item{X}{the dataset X in xts format (if not, the program will try to convert it to xts)}
