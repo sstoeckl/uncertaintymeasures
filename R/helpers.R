@@ -27,3 +27,28 @@
     return(s$v %*% diag(e) %*% t(s$u))
   }
 }
+#' @title Helper function for maxtrix root
+#'
+#' @description Calculate matrix root according to https://www.arpm.co/lab/matrix-transpose-square-root.html#x350-152200050.8.2
+#'
+#' @param A, Any matrix that you wish to take the square root of
+#'
+#' @examples
+#' A1 <- matrix(2,1,1)
+#' .ricattiRoot(A1)
+#' A2 <- 3
+#' .ricattiRoot(A2)
+#' A3 <- matrix(c(2,0.1,0.3,0.1,1,0.5,0.1,0.2,3),3,3)
+#' .garthwaitecov(A3)
+#'
+#' @importFrom expm sqrtm
+#'
+#' @export
+.garthwaitecov <- function(mat){
+  Dmat <- diag(1 / sqrt(diag(mat)))
+  cormat <- Dmat %*% mat %*% Dmat
+  cormat_half_inv <- solve(expm::sqrtm(cormat))
+
+  Amat <- cormat_half_inv %*% Dmat
+  return(Amat)
+}

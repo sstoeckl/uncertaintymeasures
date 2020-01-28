@@ -6,7 +6,8 @@
 \usage{
 OSturbulence(X, weights = NULL, squared = FALSE, norm = FALSE,
   method = NULL, s.k = 1, imp = FALSE, rolling = FALSE,
-  roll.obs = 100, use = "complete.obs", na.obs.min = NULL)
+  roll.obs = 100, use = "complete.obs", na.obs.min = NULL,
+  GW = FALSE)
 }
 \arguments{
 \item{X}{the dataset X in xts format (if not, the program will try to convert it to xts)}
@@ -30,10 +31,16 @@ if weights=NULL (the default), equal weights will be generated based on the numb
 
 \item{use}{optional, use="pairwise.complete.obs": What method of dealing with missing values should be used (note, that variables
 with more than half missing obs are thrown out anyway)}
+
+\item{GW}{optional, should the Garthwaite & Koch (2016) decomposition be calculated}
 }
 \value{
 list containing 4 elements:
    - turb: turbulence index
+   - turb.grad: contribution of individual series to turb
+   - mturb: turbulence index based on diagonal covariance matrix
+   - cturb: correlation turbulence turb/mturb
+   - GW: Shall the Garth waite & Koch (2016) decomposition also be calculated?
 }
 \description{
 Calculate OOS-turbulence based on a cross-section of times-series (xts) data
@@ -47,5 +54,11 @@ turb3 <- OSturbulence(X,s.k=12, rolling=FALSE, roll.obs=36)$turb
 plot(turb1, lwd=2, main="(Rolling) Out-of-sample turbulence (standard)")
 lines(turb2,lwd=2,col="red", main="(Rolling) Turbulence with 12 month lookback period",on=NA)
 lines(turb3,lwd=2,col="blue", main="(Growing window) Turbulence with 12 month lookback period",on=NA)
+turb <- OSturbulence(X,s.k=12, rolling=FALSE, roll.obs=36)$turb
+turbG <- OSturbulence(X,s.k=12, rolling=FALSE, roll.obs=36)$turb.grad
+turbGW <- OSturbulence(X,s.k=12, rolling=FALSE, roll.obs=36, GW=TRUE)$turb.GW
+tail(rowSums(turbG))
+tail(rowSums(turbGW))
+tail(turb)
 
 }

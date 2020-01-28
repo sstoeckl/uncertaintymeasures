@@ -16,12 +16,14 @@
 #' @param use optional, use="pairwise.complete.obs": What method of dealing with missing values should be used (note, that variables
 #' with more than half missing obs are thrown out anyway)
 #' @params na.obs.min optional, specify the number of observations necessary to be included in the output index
+#' @param GW optional, should the Garthwaite & Koch (2016) decomposition be calculated
 #'
 #' @return list containing 4 elements:
 #'    - turb: turbulence index
-#     - turb.grad: contribution of individual series to turb
-#     - mturb: turbulence index based on diagonal covariance matrix
-#     - cturb: correlation turbulence turb/mturb
+#'    - turb.grad: contribution of individual series to turb
+#'    - mturb: turbulence index based on diagonal covariance matrix
+#'    - cturb: correlation turbulence turb/mturb
+#'    - GW: Shall the Garth waite & Koch (2016) decomposition also be calculated?
 #'
 #' @examples
 #' require(xts)
@@ -32,6 +34,12 @@
 #' plot(turb1, lwd=2, main="(Rolling) Out-of-sample turbulence (standard)")
 #' lines(turb2,lwd=2,col="red", main="(Rolling) Turbulence with 12 month lookback period",on=NA)
 #' lines(turb3,lwd=2,col="blue", main="(Growing window) Turbulence with 12 month lookback period",on=NA)
+#' turb <- OSturbulence(X,s.k=12, rolling=FALSE, roll.obs=36)$turb
+#' turbG <- OSturbulence(X,s.k=12, rolling=FALSE, roll.obs=36)$turb.grad
+#' turbGW <- OSturbulence(X,s.k=12, rolling=FALSE, roll.obs=36, GW=TRUE)$turb.GW
+#' tail(rowSums(turbG))
+#' tail(rowSums(turbGW))
+#' tail(turb)
 #'
 #' @import xts
 #' @import mice
@@ -42,7 +50,7 @@
 #'
 #' @export
 OSturbulence <- function(X, weights=NULL, squared=FALSE, norm=FALSE, method=NULL, s.k=1, imp=FALSE,
-                         rolling=FALSE, roll.obs=100, use="complete.obs",na.obs.min=NULL){
+                         rolling=FALSE, roll.obs=100, use="complete.obs",na.obs.min=NULL, GW=FALSE){
   # method = c("cov", "mve", "mcd", "MCD", "OGK", "nnve", "shrink", "bagged")
   if (!requireNamespace("xts", quietly = TRUE)) {
     stop("Package \"xts\" needed for this function to work. Please install it.",
@@ -73,7 +81,7 @@ OSturbulence <- function(X, weights=NULL, squared=FALSE, norm=FALSE, method=NULL
   x <- if (is.vector(X)) matrix(X, ncol=length(X)) else (as.matrix(X))
   m <- dim(x)[1]; n<-dim(x)[2]
   x.w <- if (is.null(weights)) {sweep(x*0+1,MARGIN = 1,FUN = "/",STATS = rowSums(x*0+1,na.rm=TRUE))} else {as.matrix(weights)}
-  x.turb.grad <- x*NA; x.mturb.grad <- x.turb.grad
+  x.turb.grad <- x.mturb.grad <- x.turb.GW <- x*NA
   x.turb <- x.turb.grad[,1]
   x.mturb <- x.turb
   # dimension warning
@@ -101,6 +109,7 @@ OSturbulence <- function(X, weights=NULL, squared=FALSE, norm=FALSE, method=NULL
       x.dCov <- matrix(0,nrow = nrow(x.Cov),ncol = ncol(x.Cov))
       diag(x.dCov) <- diag(x.Cov)
       x.diCov <- .mpinv(x.dCov)
+      if (GW) {x.Acov <- .garthwaitecov(x.Cov)}
       # calculate (x*-mu) where x* is the average of the s.k most recent observations
       x.msw <- colStats(x[max(1,(i-s.k+1)):i,cols,drop=FALSE],FUN=mean,align="right",na.pad=TRUE)-x.mean
       # if there are missing row-values, set them to 0 to be able to matrix multiply below
@@ -110,6 +119,8 @@ OSturbulence <- function(X, weights=NULL, squared=FALSE, norm=FALSE, method=NULL
       #
       x.turb.grad[i,cols] <- ((x.w[i,cols] * x.msw) %*% x.iCov) * (x.w[i,cols] * x.msw)
       x.mturb.grad[i,cols] <- ((x.w[i,cols] * x.msw) %*% x.diCov) * (x.w[i,cols] * x.msw)
+      # Garthwaite decomposition
+      if (GW) {x.turb.GW[i,cols] <- (t(x.Acov %*% t(x.w[i,cols,drop=FALSE] * x.msw)))^2}
       # Sum to get indices
       x.turb[i] <- rowSums(x.turb.grad[i,,drop=FALSE],na.rm=TRUE)
       x.mturb[i] <- rowSums(x.mturb.grad[i,,drop=FALSE],na.rm=TRUE)
@@ -117,6 +128,7 @@ OSturbulence <- function(X, weights=NULL, squared=FALSE, norm=FALSE, method=NULL
       x.turb.grad[i,is.na(x[i,cols])] <- NA
       x.mturb.grad[i,is.na(x[i,cols])] <- NA
       x.w[i,is.na(x[i,cols])] <- NA
+      x.turb.GW[i,is.na(x[i,cols])] <- NA
     } else {next}
   }
   # Normalize
@@ -124,6 +136,7 @@ OSturbulence <- function(X, weights=NULL, squared=FALSE, norm=FALSE, method=NULL
     x.turb.grad <- sweep(x.turb.grad,MARGIN = 1,FUN = "/",STATS = rowSums(x.w^2,na.rm=TRUE))
     x.turb <- x.turb/rowSums(x.w^2,na.rm=TRUE) # mean of norm(x.turb) is one
     x.mturb <- x.mturb/rowSums(x.w^2,na.rm=TRUE)
+    if (GW) {x.turb.GW <- sweep(x.turb.GW,MARGIN = 1,FUN = "/",STATS = rowSums(x.w^2,na.rm=TRUE))}
   }
 
   x.cturb <- x.turb/x.mturb
@@ -132,13 +145,18 @@ OSturbulence <- function(X, weights=NULL, squared=FALSE, norm=FALSE, method=NULL
   if (squared==FALSE) {
     x.mturb <- x.mturb^0.5 # moved back because we need mturb^2
     x.turb <- x.turb^0.5
-    x.turb.grad <- sign(x.turb.grad)*abs(x.turb.grad)^0.5
+    x.turb.grad <- sweep(x.turb.grad,MARGIN = 1,FUN = "/",STATS = x.turb)  #sign(x.turb.grad)*abs(x.turb.grad)^0.5
+    if (GW) {x.turb.GW <- sweep(x.turb.GW,MARGIN = 1,FUN = "/",STATS = x.turb)}
   }
   x.mturb <- reclass(x.mturb,try.xts(X))
   x.turb <- reclass(x.turb,try.xts(X))
   x.turb.grad <- reclass(x.turb.grad,try.xts(X))
+  if (GW) {x.turb.GW <- reclass(x.turb.GW,try.xts(X))}
   colnames(x.turb) <- "turb"; colnames(x.mturb) <- "mturb"; colnames(x.cturb) <- "cturb"
   colnames(x.turb.grad) <- colnames(X)
-  result <- list(turb =x.turb, turb.grad=x.turb.grad, mturb =x.mturb, cturb =x.cturb)
+  if (GW) {colnames(x.turb.GW) <- colnames(X)}
+  # option out if not available
+  if (!GW) {x.turb.GW <- NULL}
+  result <- list(turb =x.turb, turb.grad=x.turb.grad, mturb =x.mturb, cturb =x.cturb, turb.GW=x.turb.GW)
   return(result)
 }

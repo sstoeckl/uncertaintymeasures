@@ -5,7 +5,8 @@
 \title{Calculate In-sample turbulence}
 \usage{
 ISturbulence(X, weights = NULL, squared = FALSE, norm = FALSE,
-  method = NULL, s.k = 1, imp = FALSE, use = "complete.obs")
+  method = NULL, s.k = 1, imp = FALSE, use = "complete.obs",
+  GW = FALSE)
 }
 \arguments{
 \item{X}{the dataset X in xts format (if not, the program will try to convert it to xts)}
@@ -25,10 +26,16 @@ if weights=NULL (the default), equal weights will be generated based on the numb
 
 \item{use}{optional, use="pairwise.complete.obs": What method of dealing with missing values should be used (note, that variables
 with more than half missing obs are thrown out anyway)}
+
+\item{GW}{optional, should the Garthwaite & Koch (2016) decomposition be calculated}
 }
 \value{
 list containing 4 elements:
    - turb: turbulence index
+   - turb.grad: contribution of individual series to turb
+   - mturb: turbulence index based on diagonal covariance matrix
+   - cturb: correlation turbulence turb/mturb
+   - GW: Shall the Garthwaite & Koch (2016) decomposition also be calculated?
 }
 \description{
 Calculate IS-turbulence based on a cross-section of times-series (xts) data
@@ -42,5 +49,9 @@ turb3 <- ISturbulence(X,s.k=12, method="MCD")$turb
 plot(turb1, lwd=2, main="In-sample turbulence (standard)")
 lines(turb2,lwd=2,col="red", main="Turbulence with 12 month lookback period",on=NA)
 lines(turb3,lwd=2,col="blue", main="Turbulence with 12 month lookback period and robust MCD estimator",on=NA)
+turbG <- ISturbulence(X,s.k=12)$turb.grad
+turbGW <- ISturbulence(X,s.k=12, GW=TRUE)$turb.GW
+tail(rowSums(turbG))
+tail(rowSums(turbGW))
 
 }
