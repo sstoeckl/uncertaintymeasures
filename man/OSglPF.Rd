@@ -4,9 +4,18 @@
 \alias{OSglPF}
 \title{Calculate portfolio weights for Garlappi model 1.2.3}
 \usage{
-OSglPF(factors, PFs, s.k = 1, imp = FALSE, rolling.PF = FALSE,
-  rolling.eps = FALSE, roll.obs.PF = 120, roll.obs.eps = 120,
-  rf = TRUE, gamma = 3)
+OSglPF(
+  factors,
+  PFs,
+  s.k = 1,
+  imp = FALSE,
+  rolling.PF = FALSE,
+  rolling.eps = FALSE,
+  roll.obs.PF = 120,
+  roll.obs.eps = 120,
+  rf = TRUE,
+  gamma = 3
+)
 }
 \arguments{
 \item{factors, }{list of factor premia xts}

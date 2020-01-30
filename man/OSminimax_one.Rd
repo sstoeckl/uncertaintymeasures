@@ -4,9 +4,17 @@
 \alias{OSminimax_one}
 \title{Calculate (out-of-sample) the coefficient to adjust the optimal Markowitz portfolio rule based on financial turbulence}
 \usage{
-OSminimax_one(X, weights = NULL, method = NULL, s.k = 1,
-  imp = FALSE, rf = TRUE, rolling = FALSE, roll.obs = 100,
-  NOUT = NULL)
+OSminimax_one(
+  X,
+  weights = NULL,
+  method = NULL,
+  s.k = 1,
+  imp = FALSE,
+  rf = TRUE,
+  rolling = FALSE,
+  roll.obs = 100,
+  NOUT = NULL
+)
 }
 \arguments{
 \item{X}{the dataset X in xts format (if not, the program will try to convert it to xts)}

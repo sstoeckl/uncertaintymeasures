@@ -15,7 +15,7 @@
 #' @param roll.obs optional, rolling=TRUE: Length of rolling window; rolling=FALSE: Initial estimation window size
 #' @param use optional, use="pairwise.complete.obs": What method of dealing with missing values should be used (note, that variables
 #' with more than half missing obs are thrown out anyway)
-#' @params na.obs.min optional, specify the number of observations necessary to be included in the output index
+#' @param na.obs.min optional, specify the number of observations necessary to be included in the output index
 #' @param GW optional, should the Garthwaite & Koch (2016) decomposition be calculated
 #'
 #' @return list containing 4 elements:

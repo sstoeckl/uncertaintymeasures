@@ -4,8 +4,14 @@
 \alias{ISminimax_one}
 \title{Calculate (in-sample) the coefficient to adjust the optimal Markowitz portfolio rule based on financial turbulence}
 \usage{
-ISminimax_one(X, weights = NULL, method = NULL, s.k = 1,
-  imp = FALSE, rf = TRUE)
+ISminimax_one(
+  X,
+  weights = NULL,
+  method = NULL,
+  s.k = 1,
+  imp = FALSE,
+  rf = TRUE
+)
 }
 \arguments{
 \item{X}{the dataset X in xts format (if not, the program will try to convert it to xts). Monthly returns.}

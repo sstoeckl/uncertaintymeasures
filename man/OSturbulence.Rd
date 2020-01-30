@@ -4,10 +4,20 @@
 \alias{OSturbulence}
 \title{Calculate Out-of-sample turbulence}
 \usage{
-OSturbulence(X, weights = NULL, squared = FALSE, norm = FALSE,
-  method = NULL, s.k = 1, imp = FALSE, rolling = FALSE,
-  roll.obs = 100, use = "complete.obs", na.obs.min = NULL,
-  GW = FALSE)
+OSturbulence(
+  X,
+  weights = NULL,
+  squared = FALSE,
+  norm = FALSE,
+  method = NULL,
+  s.k = 1,
+  imp = FALSE,
+  rolling = FALSE,
+  roll.obs = 100,
+  use = "complete.obs",
+  na.obs.min = NULL,
+  GW = FALSE
+)
 }
 \arguments{
 \item{X}{the dataset X in xts format (if not, the program will try to convert it to xts)}
@@ -31,6 +41,8 @@ if weights=NULL (the default), equal weights will be generated based on the numb
 
 \item{use}{optional, use="pairwise.complete.obs": What method of dealing with missing values should be used (note, that variables
 with more than half missing obs are thrown out anyway)}
+
+\item{na.obs.min}{optional, specify the number of observations necessary to be included in the output index}
 
 \item{GW}{optional, should the Garthwaite & Koch (2016) decomposition be calculated}
 }

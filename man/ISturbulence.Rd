@@ -4,9 +4,17 @@
 \alias{ISturbulence}
 \title{Calculate In-sample turbulence}
 \usage{
-ISturbulence(X, weights = NULL, squared = FALSE, norm = FALSE,
-  method = NULL, s.k = 1, imp = FALSE, use = "complete.obs",
-  GW = FALSE)
+ISturbulence(
+  X,
+  weights = NULL,
+  squared = FALSE,
+  norm = FALSE,
+  method = NULL,
+  s.k = 1,
+  imp = FALSE,
+  use = "complete.obs",
+  GW = FALSE
+)
 }
 \arguments{
 \item{X}{the dataset X in xts format (if not, the program will try to convert it to xts)}
