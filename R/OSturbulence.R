@@ -151,7 +151,7 @@ OSturbulence <- function(X, weights=NULL, squared=FALSE, norm=FALSE, method=NULL
   x.mturb <- reclass(x.mturb,try.xts(X))
   x.turb <- reclass(x.turb,try.xts(X))
   x.turb.grad <- reclass(x.turb.grad,try.xts(X))
-  if (GW) {x.turb.GW <- reclass(x.turb.GW,try.xts(X))} else {GW<- NULL}
+  if (GW) {x.turb.GW <- reclass(x.turb.GW,try.xts(X))} else {x.turb.GW <- NULL}
   colnames(x.turb) <- "turb"; colnames(x.mturb) <- "mturb"; colnames(x.cturb) <- "cturb"
   colnames(x.turb.grad) <- colnames(X)
   if (GW) {colnames(x.turb.GW) <- paste0(colnames(X),"_GW")}
