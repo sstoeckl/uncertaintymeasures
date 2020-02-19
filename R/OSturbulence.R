@@ -93,7 +93,7 @@ OSturbulence <- function(X, weights=NULL, squared=FALSE, norm=FALSE, method=NULL
   #
   for (i in roll.obs:m){ #for i>roll.obs we get finally out.of.sample
     # (i-1) for one future observation
-    if (rolling==FALSE) {x.sel <- x[1:(i-1),]} else {x.sel <- x[max(1,i-roll.obs):(i-1),]}
+    if (rolling==FALSE) {x.sel <- x[1:(i-1),,drop=FALSE]} else {x.sel <- x[max(1,i-roll.obs):(i-1),,drop=FALSE]}
     # check if there are cols with more than half NA
     cols <- which(apply(x.sel,2,function(y) sum(!is.na(y)))>=na.obs.min) # if rolling window is smaller than no of PFs
     if (length(cols)>0){
