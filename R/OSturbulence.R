@@ -102,8 +102,8 @@ OSturbulence <- function(X, weights=NULL, squared=FALSE, norm=FALSE, method=NULL
         x.Cov <- getCovRob(x.moms)
         x.mean <- getCenterRob(x.moms)
       }	else {
-        x.Cov <- (stats::cov(x.sel[,cols],use=use)) ## nearPD removed, replaced by pseudo-inverse
-        x.mean <- colMeans(x.sel[,cols],na.rm=TRUE)
+        x.Cov <- (stats::cov(x.sel[,cols,drop=FALSE],use=use)) ## nearPD removed, replaced by pseudo-inverse
+        x.mean <- colMeans(x.sel[,cols,drop=FALSE],na.rm=TRUE)
       }
       x.iCov <- .mpinv(x.Cov)
       x.dCov <- matrix(0,nrow = nrow(x.Cov),ncol = ncol(x.Cov))
