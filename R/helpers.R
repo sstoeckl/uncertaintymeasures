@@ -45,7 +45,7 @@
 #'
 #' @export
 .garthwaitecov <- function(mat){
-  Dmat <- diag(1 / sqrt(diag(mat)))
+  Dmat <- diag(1 / sqrt(diag(mat)), ncol=ncol(mat),nrow=nrow(mat))
   cormat <- Dmat %*% mat %*% Dmat
   cormat_half_inv <- solve(expm::sqrtm(cormat))
 
