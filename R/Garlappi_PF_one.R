@@ -191,6 +191,7 @@ glPF <- function(mu, Sigma, gamma=3, epsilon, rf){
 #' @importFrom plyr ldply
 #' @import xts
 #' @import zoo
+#' @importFrom stats na.omit
 #'
 #' @keywords internal
 #'
@@ -209,14 +210,14 @@ OSglPF <- function(factors,PFs, s.k=1, imp=FALSE, rolling.PF=FALSE, rolling.eps=
   N <- length(factors)
   epsilon <- list()
   # 0. Adjust factors and all datasets if necessary
-  min_date1 <- max(plyr::ldply(PFs,function(x){as.Date(time(x)[1])})$V1)
-  min_date2 <- max(plyr::ldply(factors,function(x){as.Date(time(x)[1])})$V1)
+  min_date1 <- max(plyr::ldply(PFs,function(x){as.Date(stats::time(x)[1])})$V1)
+  min_date2 <- max(plyr::ldply(factors,function(x){as.Date(stats::time(x)[1])})$V1)
   PFs <- plyr::llply(PFs,function(x){x[paste0(min_date1,"/")]})
   # 1. Now calculate OS sturb and save epsilons
   for (i in 1:N){
     epsilon[[i]] <- OSminimax_one(X = PFs[[i]], s.k = s.k, rolling=rolling.eps, roll.obs = roll.obs.eps, NOUT=N)$epsilon
   }
-  min_date_eps <- min(plyr::ldply(epsilon,function(x){as.Date(time(na.omit(x))[1])})$V1)
+  min_date_eps <- min(plyr::ldply(epsilon,function(x){as.Date(stats::time(stats::na.omit(x))[1])})$V1)
   stopifnot(as.yearmon(min_date_eps)<=(as.yearmon(min_date2)+roll.obs.PF/12))
   # 2. Now loop through each point in time and create portfolio weights
   T <- nrow(factors[[1]])

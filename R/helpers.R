@@ -31,7 +31,7 @@
 #'
 #' @description Calculate gartwaite-covariance matrix
 #'
-#' @param A, Any matrix that you wish to take the square root of
+#' @param mat, Any matrix that you wish to take the square root of
 #'
 #' @examples
 #' A1 <- matrix(2,1,1)

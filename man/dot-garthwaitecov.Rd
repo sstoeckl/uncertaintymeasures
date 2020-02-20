@@ -7,7 +7,7 @@
 .garthwaitecov(mat)
 }
 \arguments{
-\item{A, }{Any matrix that you wish to take the square root of}
+\item{mat, }{Any matrix that you wish to take the square root of}
 }
 \description{
 Calculate gartwaite-covariance matrix

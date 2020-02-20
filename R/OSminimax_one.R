@@ -49,6 +49,7 @@
 #' @importFrom zoo rollapplyr
 #' @importFrom stats cov
 #' @importFrom timeSeries colStats
+#' @importFrom stats pf qf
 #'
 #' @export
 OSminimax_one <- function(X, weights=NULL, method=NULL, s.k=1, imp=FALSE, rf=TRUE,
@@ -108,7 +109,7 @@ OSminimax_one <- function(X, weights=NULL, method=NULL, s.k=1, imp=FALSE, rf=TRU
           x.SR <- x.mean %*% x.iCov %*% x.mean
           # NOW NEW: CORRECT TRANSFORMATION
           # x.epsilon[i] <- (1/(T+1) * rowSums((x.msw %*% x.iCov) * x.msw))
-          x.epsilon[i] <- NOUT*(T-1)/T/(T-NOUT) * qf(p=pf(q = T*(T-n)/(T+1)/(T-1) * 1/n * rowSums((x.msw %*% x.iCov) * x.msw), df1 = n, df2 = T-n), df1 = NOUT, df2 = T-NOUT)
+          x.epsilon[i] <- NOUT*(T-1)/T/(T-NOUT) * stats::qf(p=stats::pf(q = T*(T-n)/(T+1)/(T-1) * 1/n * rowSums((x.msw %*% x.iCov) * x.msw), df1 = n, df2 = T-n), df1 = NOUT, df2 = T-NOUT)
           x.sturb[i] <- apply(as.matrix(1-(x.epsilon[i]/x.SR)^0.5),1,FUN=function(x){max(x,0)})
         } else {next}
       }
@@ -132,7 +133,7 @@ OSminimax_one <- function(X, weights=NULL, method=NULL, s.k=1, imp=FALSE, rf=TRU
           x.SR <- x.mean %*% x.iCov %*% x.mean
           # NOW NEW: CORRECT TRANSFORMATION
           # x.epsilon[i] <- s.k*(T-T/s.k-n+1)/(T/s.k-1)/(s.k-1) * (T-1)/T/(T-NOUT) * rowSums((x.msw %*% x.iCov) * x.msw)
-          x.epsilon[i] <- NOUT*(T-1)/T/(T-NOUT) * qf(p=pf(q = s.k*(T-T/s.k-n+1)/(T/s.k-1)/(s.k-1) * 1/n * rowSums((x.msw %*% x.iCov) * x.msw), df1 = n, df2 = T-T/s.k-n+1), df1 = NOUT, df2 = T-NOUT)
+          x.epsilon[i] <- NOUT*(T-1)/T/(T-NOUT) * stats::qf(p=stats::pf(q = s.k*(T-T/s.k-n+1)/(T/s.k-1)/(s.k-1) * 1/n * rowSums((x.msw %*% x.iCov) * x.msw), df1 = n, df2 = T-T/s.k-n+1), df1 = NOUT, df2 = T-NOUT)
           #
           x.sturb[i] <- apply(as.matrix(1-(x.epsilon[i]/x.SR)^0.5),1,FUN=function(x){max(x,0)})
         } else {next}
