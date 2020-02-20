@@ -13,7 +13,7 @@ Suggests: covr,
     rmarkdown
 Depends: R (>= 3.4)
 RoxygenNote: 7.0.2
-Imports: xts, mice, fAssets, zoo, timeSeries, nleqslv, plyr
+Imports: xts, mice, fAssets, zoo, timeSeries, nleqslv, plyr, expm
 VignetteBuilder: knitr
 URL: https://github.com/sstoeckl/uncertaintymeasures
 BugReports: https://github.com/sstoeckl/uncertaintymeasures/issues
