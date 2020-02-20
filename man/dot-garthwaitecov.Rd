@@ -2,7 +2,7 @@
 % Please edit documentation in R/helpers.R
 \name{.garthwaitecov}
 \alias{.garthwaitecov}
-\title{Helper function for maxtrix root}
+\title{Garthwaite-Covariance matrix}
 \usage{
 .garthwaitecov(mat)
 }
@@ -10,13 +10,11 @@
 \item{A, }{Any matrix that you wish to take the square root of}
 }
 \description{
-Calculate matrix root according to https://www.arpm.co/lab/matrix-transpose-square-root.html#x350-152200050.8.2
+Calculate gartwaite-covariance matrix
 }
 \examples{
 A1 <- matrix(2,1,1)
-.ricattiRoot(A1)
-A2 <- 3
-.ricattiRoot(A2)
+.garthwaitecov(A1)
 A3 <- matrix(c(2,0.1,0.3,0.1,1,0.5,0.1,0.2,3),3,3)
 .garthwaitecov(A3)
 
