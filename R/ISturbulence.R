@@ -31,10 +31,16 @@
 #' plot(turb1, lwd=2, main="In-sample turbulence (standard)")
 #' lines(turb2,lwd=2,col="red", main="Turbulence with 12 month lookback period",on=NA)
 #' lines(turb3,lwd=2,col="blue", main="Turbulence with 12 month lookback period and robust MCD estimator",on=NA)
-#' turbG <- ISturbulence(X,s.k=12)$turb.grad
-#' turbGW <- ISturbulence(X,s.k=12, GW=TRUE)$turb.GW
-#' tail(rowSums(turbG))
-#' tail(rowSums(turbGW))
+#' # play around with weights and NA. Also try GW
+#' X <- X[,1:5]; X[1:10,5] <- NA
+#' k<-0.1; W <- matrix(c(rep((1-k)/4,4),k),nrow = nrow(X), ncol=ncol(X), byrow = TRUE)
+#' turbG <- ISturbulence(X,s.k=3, weights=W)$turb.grad
+#' turbGW <- ISturbulence(X,s.k=3, GW=TRUE, weights=W)$turb.GW
+#' head(rowSums(turbG,na.rm=TRUE),12)
+#' head(rowSums(turbGW,na.rm=TRUE),12)
+#' head(ISturbulence(X,s.k=3, weights=W)$turb,12)
+#' head(turbG,12)
+#' head(turbGW,12)
 #'
 #' @import xts
 #' @import mice
@@ -73,7 +79,7 @@ ISturbulence <- function(X, weights=NULL, squared=FALSE, norm=FALSE, method=NULL
   }
   # initialise output vectors
   x <- if (is.vector(X)) matrix(X, ncol=length(X)) else (as.matrix(X))
-  m <- dim(x)[1]; n<-dim(x)[2]
+  m <- dim(x)[1]; n <- dim(x)[2]
   x.w <- if (is.null(weights)) {sweep(x*0+1,MARGIN = 1,FUN = "/",STATS = rowSums(x*0+1,na.rm=TRUE))} else {as.matrix(weights)}
   x.turb <- NULL
   x.mturb <- NULL
@@ -111,7 +117,7 @@ ISturbulence <- function(X, weights=NULL, squared=FALSE, norm=FALSE, method=NULL
   x.turb.grad[is.na(x)] <- NA
   x.mturb.grad[is.na(x)] <- NA
   x.w[is.na(x)] <- NA
-  x.turb.GW[is.na(x)] <- NA
+  #x.turb.GW[is.na(x)] <- NA
   # Normalize
   if (norm==TRUE) {
     x.turb.grad <- sweep(x.turb.grad,MARGIN = 1,FUN = "/",STATS = rowSums(x.w^2,na.rm=TRUE))
