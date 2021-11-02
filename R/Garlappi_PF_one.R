@@ -20,10 +20,12 @@
 #' mu_in <- list(mu1=colMeans(X[,1:4]),mu2=colMeans(X[,5:7]))
 #' Sigma_in <- cov(X[,1:7])
 #' gamma <- 3
+#'
 #' ## First calculate the tangency portfolio for the first 4 assets without parameter uncertainty
+#'
 #' round(c(1/gamma*.mpinv(Sigma_in[1:4,1:4])%*%mu_in[[1]]),4)
 #' # Then do it using the function
-#' round(glPF(mu=mu_in[[1]],Sigma=Sigma_in[1:4,1:4],gamma=gamma,epsilon=list(eps1=0),rf=TRUE)$w,4)
+#' round(glPF(mu=mu_in[1],Sigma=Sigma_in[1:4,1:4],gamma=gamma,epsilon=list(eps1=0),rf=TRUE)$w,4)
 #' # Now, we allow for parameter uncertainty for all 4 assets together
 #' round(glPF(mu=mu_in[[1]],Sigma=Sigma_in[1:4,1:4],gamma=gamma,epsilon=list(eps1=0.1),rf=TRUE)$w,4)
 #' round(glPF(mu=mu_in[[1]],Sigma=Sigma_in[1:4,1:4],gamma=gamma,epsilon=list(eps1=0.2),rf=TRUE)$w,4)
@@ -33,7 +35,9 @@
 #' round(glPF(mu=mu_in[[1]],Sigma=Sigma_in[1:4,1:4],gamma=gamma,epsilon=list(eps1=0.1),rf=FALSE)$w,4)
 #' round(glPF(mu=mu_in[[1]],Sigma=Sigma_in[1:4,1:4],gamma=gamma,epsilon=list(eps1=0.8),rf=FALSE)$w,4)
 #' round(glPF(mu=mu_in[[1]],Sigma=Sigma_in[1:4,1:4],gamma=gamma,epsilon=list(eps1=10000),rf=FALSE)$w,4)
+#'
 #' ## Second: We use two groups for the uncertainty example now
+#'
 #' # Tangency portfolio for all 7 assets
 #' round(c(1/gamma*.mpinv(Sigma_in)%*%unlist(mu_in)),4)
 #' # The same using the function
@@ -42,7 +46,9 @@
 #' round(glPF(mu=mu_in,Sigma=Sigma_in,gamma=gamma,epsilon=list(eps1=0.1,eps2=0),rf=TRUE)$w,4)
 #' round(glPF(mu=mu_in,Sigma=Sigma_in,gamma=gamma,epsilon=list(eps1=0,eps2=0.1),rf=TRUE)$w,4)
 #' round(glPF(mu=mu_in,Sigma=Sigma_in,gamma=gamma,epsilon=list(eps1=0.1,eps2=0.05),rf=TRUE)$w,4)
+#'
 #' ## Third: We do it for single assets (two)
+#'
 #' mu_in <- list(mu1=colMeans(X[,1]),mu2=colMeans(X[,2]))
 #' Sigma_in <- cov(X[,1:2])
 #' gamma <- 3
@@ -58,6 +64,25 @@
 #' round(glPF(mu=mu_in,Sigma=Sigma_in,gamma=gamma,epsilon=list(eps1=0.1,eps2=0),rf=TRUE)$sturb,4)
 #' round(glPF(mu=mu_in,Sigma=Sigma_in,gamma=gamma,epsilon=list(eps1=0,eps2=0.1),rf=TRUE)$sturb,4)
 #' round(glPF(mu=mu_in,Sigma=Sigma_in,gamma=gamma,epsilon=list(eps1=0.0002,eps2=0.01),rf=TRUE)$sturb,4)
+#'
+#' ## Fourth: Many single assets
+#' mu_in <- as.list(colMeans(X[,1:7]))
+#' Sigma_in <- cov(X[,1:7])
+#' eps <- as.list(rep(0.1,7))
+#' gamma <- 3
+#' # Tangency portfolio for 2 assets
+#' round(c(1/gamma*.mpinv(Sigma_in)%*%unlist(mu_in)),4)
+#' # The same using the function
+#' round(glPF(mu=mu_in,Sigma=Sigma_in,gamma=gamma,epsilon=eps,rf=TRUE)$w,4)
+#' # Introduce parameter uncertainty for single assets and groups
+#' round(glPF(mu=mu_in,Sigma=Sigma_in,gamma=gamma,epsilon=list(eps1=0.1,eps2=0),rf=TRUE)$w,4)
+#' round(glPF(mu=mu_in,Sigma=Sigma_in,gamma=gamma,epsilon=list(eps1=0,eps2=0.1),rf=TRUE)$w,4)
+#' round(glPF(mu=mu_in,Sigma=Sigma_in,gamma=gamma,epsilon=list(eps1=0.0002,eps2=0.01),rf=TRUE)$w,4)
+#' # Sturb
+#' round(glPF(mu=mu_in,Sigma=Sigma_in,gamma=gamma,epsilon=list(eps1=0.1,eps2=0),rf=TRUE)$sturb,4)
+#' round(glPF(mu=mu_in,Sigma=Sigma_in,gamma=gamma,epsilon=list(eps1=0,eps2=0.1),rf=TRUE)$sturb,4)
+#' round(glPF(mu=mu_in,Sigma=Sigma_in,gamma=gamma,epsilon=list(eps1=0.0002,eps2=0.01),rf=TRUE)$sturb,4)
+#'
 #'
 #' @import nleqslv
 #' @import xts
@@ -103,14 +128,17 @@ glPF <- function(mu, Sigma, gamma=3, epsilon, rf){
         n <- length(mu); nvec <- plyr::laply(mu,length)
         N <- length(unlist(mu))
         dw <- NULL
+        vec <- list();k<-0
+        # create vec list
+        for (l in 1:length(mu)){vec[[l]]<-seq_len(length(mu[[l]]))+k;k<-k+length(mu[[l]])}
+        # now run loop
         for (i in 1:n){
-          vec <- seq(from=max(nvec[i-1],0)+1,to=sum(nvec[1:i]))
-          temp_dw <- (c(sub_fn(mu_in=mu[[i]],
-                               mu_out=unlist(mu[[-i]]),
-                               Sigma_in=Sigma[vec,vec],
-                               Sigma_out=Sigma[vec,-vec],
-                               w_out=w[-vec],
-                               eps_in=epsilon[[i]],gamma=gamma)) - w[vec])
+          temp_dw <- (c(sub_fn(mu_in=unlist(mu[i]),
+                               mu_out=unlist(mu[-i]),
+                               Sigma_in=Sigma[vec[[i]],vec[[i]],drop=FALSE],
+                               Sigma_out=Sigma[vec[[i]],-vec[[i]],drop=FALSE],
+                               w_out=w[-vec[[i]]],
+                               eps_in=epsilon[[i]],gamma=gamma)) - w[vec[[i]]])
           dw <- c(dw,temp_dw)
         }
         return(dw)
@@ -134,22 +162,23 @@ glPF <- function(mu, Sigma, gamma=3, epsilon, rf){
   }
   n <- length(mu); nvec <- plyr::laply(mu,length)
   N <- length(unlist(mu))
+  vec <- list();k<-0
+  # create vec list
+  for (l in 1:length(mu)){vec[[l]]<-seq_len(length(mu[[l]]))+k;k<-k+length(mu[[l]])}
   sturb <- NULL
   for (i in 1:n){
-    vec <- seq(from=max(nvec[i-1],0)+1,to=sum(nvec[1:i]))
-    temp_sturb <- (c(sub_sturb(mu_in=mu[[i]],
-                               mu_out=unlist(mu[[-i]]),
-                               Sigma_in=Sigma[vec,vec],
-                               Sigma_out=Sigma[vec,-vec],
-                               w_out=w[-vec],
-                               eps_in=epsilon[[i]],gamma=gamma)))
+    temp_sturb <- (c(sub_sturb(mu_in=unlist(mu[i]),
+                               mu_out=unlist(mu[-i]),
+                               Sigma_in=Sigma[vec[[i]],vec[[i]],drop=FALSE],
+                               Sigma_out=Sigma[vec[[i]],-vec[[i]],drop=FALSE],
+                               w_out=w[-vec[[i]]],
+                               eps_in=epsilon[[i]],gamma=gamma)) - w[vec[[i]]])
     sturb <- c(sturb,temp_sturb)
   }
   names(w) <- names(unlist(mu))
   names(sturb) <- names(unlist(factor))
   return(list(w=w,sturb=sturb))
 }
-
 #' @title Calculate portfolio weights for Garlappi model 1.2.3
 #'
 #' @description Calculate portfolio weights for Garlappi model 1.2.2-1.2.3: Uncertainty about expected returns
